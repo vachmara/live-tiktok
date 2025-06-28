@@ -11,17 +11,14 @@ useHead({
   }
 })
 
-const title = 'Nuxt Starter Template'
-const description = 'Nuxt UI Pro is a collection of premium Vue components built on top of Nuxt UI to create beautiful & responsive Nuxt applications in minutes.'
+const title = 'Vachmara Live'
+const description = 'Educational development that will be used on @vachmara TikTok live streams.'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
-  ogDescription: description,
-  ogImage: 'https://assets.hub.nuxt.com/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJodHRwczovL3VpLXByby1zdGFydGVyLm51eHQuZGV2IiwiaWF0IjoxNzM5NDYzMzk4fQ.XLzPkSW6nRbPW07QO1RkMwz_RAPA4KfeyrWrK3li9YI.jpg?theme=light',
-  twitterImage: 'https://assets.hub.nuxt.com/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJodHRwczovL3VpLXByby1zdGFydGVyLm51eHQuZGV2IiwiaWF0IjoxNzM5NDYzMzk4fQ.XLzPkSW6nRbPW07QO1RkMwz_RAPA4KfeyrWrK3li9YI.jpg?theme=light',
-  twitterCard: 'summary_large_image'
+  ogDescription: description
 })
 </script>
 
@@ -30,20 +27,18 @@ useSeoMeta({
     <UHeader>
       <template #left>
         <NuxtLink to="/">
-          <LogoPro class="w-auto h-6 shrink-0" />
+          TikTok Live
         </NuxtLink>
-
-        <TemplateMenu />
       </template>
 
       <template #right>
         <UColorModeButton />
 
         <UButton
-          to="https://github.com/nuxt-ui-pro/starter"
+          to="https://github.com/vachmara"
           target="_blank"
           icon="i-simple-icons-github"
-          aria-label="GitHub"
+          aria-label="Vachmara GitHub"
           color="neutral"
           variant="ghost"
         />
