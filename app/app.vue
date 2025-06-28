@@ -35,10 +35,10 @@ useSeoMeta({
         <UColorModeButton />
 
         <UButton
-          to="https://github.com/vachmara"
+          to="https://github.com/vachmara/live-tiktok"
           target="_blank"
           icon="i-simple-icons-github"
-          aria-label="Vachmara GitHub"
+          aria-label="Repo GitHub"
           color="neutral"
           variant="ghost"
         />
