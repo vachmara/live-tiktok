@@ -3,6 +3,7 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const store = useLiveStore()
+const { connect, disconnect } = store
 const { username, loading } = storeToRefs(store)
 
 const schema = z.object({
@@ -15,11 +16,14 @@ const state = reactive<Partial<Schema>>({
   username: ''
 })
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+function onSubmit(event: FormSubmitEvent<Schema>) {
   username.value = event.data.username
+  connect()
 }
 
 async function onReset() {
+  if (loading.value) return
+  disconnect()
   state.username = ''
   username.value = ''
 }
