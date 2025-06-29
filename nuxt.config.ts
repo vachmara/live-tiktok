@@ -16,6 +16,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 4
   },
 
+  experimental: {
+    componentIslands: true
+  },
+
   compatibilityDate: '2025-01-15',
 
   eslint: {

@@ -2,6 +2,11 @@
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
+const store = useLiveStore()
+const { connect, disconnect } = store
+const { username: usernameStored } = storeToRefs(store)
+const loading = ref<boolean>(false)
+
 const schema = z.object({
   username: z.string().min(1, 'Username is required')
 })
@@ -12,10 +17,29 @@ const state = reactive<Partial<Schema>>({
   username: ''
 })
 
-const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-  console.log(event.data)
+  loading.value = true
+  usernameStored.value = event.data.username
+  try {
+    await connect()
+  } catch (error) {
+    console.error('Connection failed:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function onReset() {
+  loading.value = true
+  state.username = ''
+  usernameStored.value = ''
+  try {
+    await disconnect()
+  } catch (error) {
+    console.error('Disconnection failed:', error)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -35,6 +59,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UInput
           v-model="state.username"
           placeholder="vachmara"
+          :disabled="loading || !!usernameStored"
         />
       </UFormField>
 
@@ -43,6 +68,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           type="submit"
           class="w-24 flex items-center justify-center"
           variant="subtle"
+          :disabled="loading || !!usernameStored"
         >
           Connect
         </UButton>
@@ -51,6 +77,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           color="neutral"
           class="w-24 flex items-center justify-center"
           variant="subtle"
+          :disabled="loading || !usernameStored"
+          @click="onReset"
         >
           Reset
         </UButton>
