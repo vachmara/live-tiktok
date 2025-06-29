@@ -1,9 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui-pro'
-  ],
+  modules: ['@nuxt/eslint', '@nuxt/ui-pro', '@pinia/nuxt'],
 
   devtools: {
     enabled: true
@@ -17,12 +14,6 @@ export default defineNuxtConfig({
 
   future: {
     compatibilityVersion: 4
-  },
-
-  nitro: {
-    experimental: {
-      websocket: true
-    }
   },
 
   compatibilityDate: '2025-01-15',
