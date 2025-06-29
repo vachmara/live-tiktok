@@ -3,9 +3,7 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const store = useLiveStore()
-const { connect, disconnect } = store
-const { username: usernameStored } = storeToRefs(store)
-const loading = ref<boolean>(false)
+const { username, loading } = storeToRefs(store)
 
 const schema = z.object({
   username: z.string().min(1, 'Username is required')
@@ -18,28 +16,12 @@ const state = reactive<Partial<Schema>>({
 })
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  loading.value = true
-  usernameStored.value = event.data.username
-  try {
-    await connect()
-  } catch (error) {
-    console.error('Connection failed:', error)
-  } finally {
-    loading.value = false
-  }
+  username.value = event.data.username
 }
 
 async function onReset() {
-  loading.value = true
   state.username = ''
-  usernameStored.value = ''
-  try {
-    await disconnect()
-  } catch (error) {
-    console.error('Disconnection failed:', error)
-  } finally {
-    loading.value = false
-  }
+  username.value = ''
 }
 </script>
 
@@ -59,7 +41,7 @@ async function onReset() {
         <UInput
           v-model="state.username"
           placeholder="vachmara"
-          :disabled="loading || !!usernameStored"
+          :disabled="loading || !!username"
         />
       </UFormField>
 
@@ -68,7 +50,7 @@ async function onReset() {
           type="submit"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="loading || !!usernameStored"
+          :disabled="loading || !!username"
         >
           Connect
         </UButton>
@@ -77,7 +59,7 @@ async function onReset() {
           color="neutral"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="loading || !usernameStored"
+          :disabled="loading || !username"
           @click="onReset"
         >
           Reset
