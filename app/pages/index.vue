@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <UContainer class="flex flex-col py-8 gap-5 items-center justify-center">
+  <UContainer class="flex flex-col py-8 gap-5">
     <LiveForm />
   </UContainer>
 </template>
