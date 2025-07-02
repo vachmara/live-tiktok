@@ -1,5 +1,17 @@
 import type { ReceivedEvents } from '@/types'
 
+const ALLOWED_EVENTS = [
+  'chat',
+  'member',
+  'gift',
+  'roomUser',
+  'like',
+  'streamEnd',
+  'disconnected',
+  'connected',
+  'error'
+]
+
 export const useLiveStore = defineStore('live', () => {
   const username = ref<string>()
   const max_events = ref<number>(500)
@@ -30,7 +42,7 @@ export const useLiveStore = defineStore('live', () => {
           username.value = data.username
           console.log('[ws] Connected to TikTok Live:', username.value)
         } else if (data.event) {
-          if (debug) console.log(`[ws] Event received: ${data.event}`, data.data)
+          if (debug.value) console.log(`[ws] Event received: ${data.event}`, data.data)
           addEvent(data)
         }
       } catch (error) {
@@ -46,6 +58,10 @@ export const useLiveStore = defineStore('live', () => {
   })
 
   const addEvent = (event: ReceivedEvents) => {
+    if (!ALLOWED_EVENTS.includes(event.event)) {
+      if (debug.value) console.warn(`[ws] Event not allowed: ${event.event}`)
+      return
+    }
     events.value.push(event)
     if (events.value.length > max_events.value) events.value.shift()
   }
