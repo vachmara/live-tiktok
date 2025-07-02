@@ -11,7 +11,7 @@ useHead({
   }
 })
 
-const title = 'Vachmara Live'
+const title = 'Tiktok Live Games'
 const description = 'Educational development that will be used on @vachmara TikTok live streams.'
 
 useSeoMeta({
@@ -27,7 +27,7 @@ useSeoMeta({
     <UHeader>
       <template #left>
         <NuxtLink to="/">
-          TikTok Live
+          TikTok Live Games
         </NuxtLink>
       </template>
 

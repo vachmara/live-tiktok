@@ -1,5 +1,24 @@
+import type { ClientEventMap } from 'tiktok-live-connector'
+
+// Extract the data type from EventHandler<T> to get T
+type ExtractEventData<T> = T extends (event: infer U) => void | Promise<void> ? U : never
+
+// Create a map of event names to their data types
+type ClientEventDataMap = {
+  [K in keyof ClientEventMap]: ExtractEventData<ClientEventMap[K]>
+}
+
+interface ReceivedEvents {
+  event: keyof ClientEventMap
+  data: ClientEventDataMap[keyof ClientEventMap]
+}
+
 export const useLiveStore = defineStore('live', () => {
   const username = ref<string>('')
+  const max_events = ref<number>(1000)
+  const events = ref<ClientEventDataMap[keyof ClientEventMap][]>([])
+  const debug = ref<boolean>(false)
+
   const toast = useToast()
 
   const websocket = useWebSocket('/ws/live', {
@@ -22,7 +41,8 @@ export const useLiveStore = defineStore('live', () => {
           username.value = data.username
           console.log('[ws] Connected to TikTok Live:', username.value)
         } else if (data.event) {
-          console.log(`[ws] Event received: ${data.event}`, data.data)
+          if (debug) console.log(`[ws] Event received: ${data.event}`, data.data)
+          addEvent(data)
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error)
@@ -35,5 +55,10 @@ export const useLiveStore = defineStore('live', () => {
     }
   })
 
-  return { username, ...websocket }
+  const addEvent = (event: ReceivedEvents) => {
+    events.value.push(event.data)
+    if (events.value.length > max_events.value) events.value.shift()
+  }
+
+  return { username, events, max_events, debug, ...websocket }
 })
