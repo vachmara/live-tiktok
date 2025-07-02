@@ -4,5 +4,6 @@
 <template>
   <UContainer class="flex flex-col py-8 gap-5">
     <LiveForm />
+    <ChatMessages />
   </UContainer>
 </template>

@@ -3,7 +3,7 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const store = useLiveStore()
-const { close, open, send, status } = store
+const { close, open, send } = store
 const { username } = storeToRefs(store)
 
 const schema = z.object({
@@ -13,7 +13,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-  username: ''
+  username: username.value || ''
 })
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -28,12 +28,18 @@ async function onReset() {
   state.username = ''
   username.value = ''
 }
-
-const isOpen = computed(() => status === 'OPEN')
 </script>
 
 <template>
   <UCard variant="outline">
+    <template #header>
+      <h2 class="text-lg font-semibold">
+        Connect to TikTok Live
+      </h2>
+      <p class="text-sm text-muted">
+        Enter your TikTok username to start receiving live events.
+      </p>
+    </template>
     <UForm
       :schema="schema"
       :state="state"
@@ -48,7 +54,7 @@ const isOpen = computed(() => status === 'OPEN')
         <UInput
           v-model="state.username"
           placeholder="vachmara"
-          :disabled="isOpen"
+          :disabled="!!username"
         />
       </UFormField>
 
@@ -57,7 +63,7 @@ const isOpen = computed(() => status === 'OPEN')
           type="submit"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="isOpen"
+          :disabled="!!username"
         >
           Connect
         </UButton>
@@ -66,8 +72,9 @@ const isOpen = computed(() => status === 'OPEN')
           color="neutral"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="!isOpen"
-          @click="onReset"
+          :disabled="!username"
+          @click="
+            onReset"
         >
           Reset
         </UButton>

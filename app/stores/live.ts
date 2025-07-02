@@ -1,8 +1,8 @@
 import type { ReceivedEvents } from '@/types'
 
 export const useLiveStore = defineStore('live', () => {
-  const username = ref<string>('')
-  const max_events = ref<number>(1000)
+  const username = ref<string>()
+  const max_events = ref<number>(500)
 
   const events = ref<ReceivedEvents[]>([])
   const debug = ref<boolean>(false)
@@ -17,6 +17,7 @@ export const useLiveStore = defineStore('live', () => {
         const data = JSON.parse(event.data)
         if (data.error) {
           console.error('WebSocket error:', data.error)
+          username.value = undefined
           toast.add({
             title: 'Error',
             description: data.error
@@ -38,6 +39,7 @@ export const useLiveStore = defineStore('live', () => {
           title: 'Error',
           description: 'Failed to parse WebSocket message'
         })
+        username.value = undefined
         ws.close()
       }
     }
