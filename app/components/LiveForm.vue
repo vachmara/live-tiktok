@@ -3,8 +3,8 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const store = useLiveStore()
-const { connect, disconnect } = store
-const { username, loading } = storeToRefs(store)
+const { close, open, send, status } = store
+const { username } = storeToRefs(store)
 
 const schema = z.object({
   username: z.string().min(1, 'Username is required')
@@ -18,15 +18,18 @@ const state = reactive<Partial<Schema>>({
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
   username.value = event.data.username
-  connect()
+  open()
+  console.log('[LiveForm] Connecting to TikTok Live with username:', username.value)
+  send(JSON.stringify({ username: username.value }))
 }
 
 async function onReset() {
-  if (loading.value) return
-  disconnect()
+  close()
   state.username = ''
   username.value = ''
 }
+
+const isOpen = computed(() => status === 'OPEN')
 </script>
 
 <template>
@@ -45,7 +48,7 @@ async function onReset() {
         <UInput
           v-model="state.username"
           placeholder="vachmara"
-          :disabled="loading || !!username"
+          :disabled="isOpen"
         />
       </UFormField>
 
@@ -54,7 +57,7 @@ async function onReset() {
           type="submit"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="loading || !!username"
+          :disabled="isOpen"
         >
           Connect
         </UButton>
@@ -63,7 +66,7 @@ async function onReset() {
           color="neutral"
           class="w-24 flex items-center justify-center"
           variant="subtle"
-          :disabled="loading || !username"
+          :disabled="!isOpen"
           @click="onReset"
         >
           Reset

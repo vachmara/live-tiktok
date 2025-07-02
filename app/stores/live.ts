@@ -1,26 +1,39 @@
 export const useLiveStore = defineStore('live', () => {
-  const connection = ref<EventSource | null>(null)
   const username = ref<string>('')
-  const loading = ref<boolean>(false)
+  const toast = useToast()
 
-  function connect() {
-    if (!username.value) return
-    loading.value = true
-    try {
-      connection.value = new EventSource(`/live?username=${username.value}`)
-    } catch (error) {
-      console.error('Connection error:', error)
-    } finally {
-      loading.value = false
+  const websocket = useWebSocket('/ws/live', {
+    immediate: false,
+    heartbeat: true,
+    async onMessage(ws, event) {
+      try {
+        const data = JSON.parse(event.data)
+        if (data.error) {
+          console.error('WebSocket error:', data.error)
+          toast.add({
+            title: 'Error',
+            description: data.error
+          })
+          ws.close()
+          return
+        }
+
+        if (data.status === 'connected') {
+          username.value = data.username
+          console.log('[ws] Connected to TikTok Live:', username.value)
+        } else if (data.event) {
+          console.log(`[ws] Event received: ${data.event}`, data.data)
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error)
+        toast.add({
+          title: 'Error',
+          description: 'Failed to parse WebSocket message'
+        })
+        ws.close()
+      }
     }
-  }
+  })
 
-  function disconnect() {
-    if (connection.value) {
-      connection.value.close()
-      connection.value = null
-    }
-  }
-
-  return { loading, connection, username, connect, disconnect }
+  return { username, ...websocket }
 })
