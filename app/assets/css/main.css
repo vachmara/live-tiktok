@@ -20,3 +20,8 @@
 :root {
   --ui-container: var(--container-4xl);
 }
+
+::selection {
+  background-color: var(--color-orange-400);
+  color: var(--color-white);
+}

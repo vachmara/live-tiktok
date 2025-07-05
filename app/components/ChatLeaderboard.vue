@@ -2,6 +2,7 @@
 import type { WebcastChatMessage, WebcastLikeMessage, WebcastGiftMessage, WebcastRoomUserSeqMessage } from 'tiktok-live-connector'
 
 interface LeaderboardUser {
+  userId: string
   uniqueId: string
   nickname: string
   profilePicture?: string
@@ -26,6 +27,14 @@ const viewerCount = computed(() => {
     .sort((a, b) => Number(BigInt(b.common?.createTime || '0') - BigInt(a.common?.createTime || '0')))
 
   return roomUserEvents[0]?.viewerCount || 0
+})
+
+// ranksList from the last WebcastRoomUserSeqMessage
+const ranksList = computed(() => {
+  const lastRoomUserEvent = events.value?.slice().reverse().find(event => event.event === 'roomUser')
+  if (!lastRoomUserEvent) return []
+  const data = lastRoomUserEvent.data as WebcastRoomUserSeqMessage
+  return data.ranksList || []
 })
 
 const selectedCategory = ref<'total' | 'likes' | 'messages' | 'gifts' | 'follows'>('total')
@@ -79,6 +88,7 @@ const leaderboardData = computed(() => {
     const userId = user.uniqueId
     if (!userMap.has(userId)) {
       userMap.set(userId, {
+        userId: user.userId,
         uniqueId: userId,
         nickname: user.nickname || userId,
         profilePicture: user.profilePicture?.url?.[0],
@@ -239,11 +249,17 @@ const getCurrentValue = (user: LeaderboardUser) => {
         </div>
 
         <!-- Avatar -->
-        <UAvatar
-          :src="user.profilePicture"
-          :alt="user.nickname"
-          size="sm"
-        />
+
+        <UChip
+          :color="ranksList.find(r => r.user?.userId === user.userId) ? 'success': 'error'
+          "
+        >
+          <UAvatar
+            :src="user.profilePicture"
+            :alt="user.nickname"
+            size="sm"
+          />
+        </UChip>
 
         <!-- User Info -->
         <div>
