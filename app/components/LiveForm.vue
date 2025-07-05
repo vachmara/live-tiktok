@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import { USwitch } from '#components'
 
 const store = useLiveStore()
 const { close, open, send } = store
-const { username } = storeToRefs(store)
+const { username, debug } = storeToRefs(store)
 
 const schema = z.object({
   username: z.string().min(1, 'Username is required')
@@ -33,12 +34,38 @@ async function onReset() {
 <template>
   <UCard variant="outline">
     <template #header>
-      <h2 class="text-lg font-semibold">
-        Connect to TikTok Live
-      </h2>
-      <p class="text-sm text-muted">
-        Enter your TikTok username to start receiving live events.
-      </p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">
+            Connect to TikTok Live
+          </h2>
+          <p class="text-sm text-muted">
+            Enter your TikTok username to start receiving live events.
+          </p>
+        </div>
+
+        <UModal>
+          <UButton
+            icon="i-lucide-settings"
+            color="neutral"
+            variant="subtle"
+          />
+
+          <template #content>
+            <div class="p-4">
+              <UFormField
+                label="Debug Mode"
+                description="Enable debug mode to see raw event data in the console."
+              >
+                <USwitch
+                  v-model="debug"
+                  :label="debug ? 'Enabled' : 'Disabled'"
+                />
+              </UFormField>
+            </div>
+          </template>
+        </UModal>
+      </div>
     </template>
     <UForm
       :schema="schema"

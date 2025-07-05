@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { WebcastChatMessage, WebcastLikeMessage, WebcastGiftMessage } from 'tiktok-live-connector'
+import type { WebcastChatMessage, WebcastLikeMessage, WebcastGiftMessage, WebcastRoomUserSeqMessage } from 'tiktok-live-connector'
 
 interface LeaderboardUser {
   uniqueId: string
@@ -16,6 +16,18 @@ const store = useLiveStore()
 const { events } = storeToRefs(store)
 const totalLikes = ref(0)
 
+const viewerCount = computed(() => {
+  if (!events.value?.length) return 0
+
+  const roomUserEvents = events.value
+    .filter(event => event.event === 'roomUser')
+    .map(event => event.data as WebcastRoomUserSeqMessage)
+    .filter(data => data.common?.createTime)
+    .sort((a, b) => Number(BigInt(b.common?.createTime || '0') - BigInt(a.common?.createTime || '0')))
+
+  return roomUserEvents[0]?.viewerCount || 0
+})
+
 const selectedCategory = ref<'total' | 'likes' | 'messages' | 'gifts' | 'follows'>('total')
 
 const categories = [
@@ -27,8 +39,10 @@ const categories = [
 ]
 
 // Compute leaderboard data from events
+// Fix: Remove side effects from computed and handle undefined values properly
 const leaderboardData = computed(() => {
   const userMap = new Map<string, LeaderboardUser>()
+  let currentTotalLikes = 0
 
   events.value?.forEach((event) => {
     const { event: eventType, data } = event
@@ -39,10 +53,15 @@ const leaderboardData = computed(() => {
       case 'chat':
         user = (data as WebcastChatMessage).user
         break
-      case 'like':
+      case 'like': {
+        // Fix: Wrap in braces to allow variable declarations
         user = (data as WebcastLikeMessage).user
-        totalLikes.value = (data as WebcastLikeMessage).totalLikeCount || 0
+        const likeData = data as WebcastLikeMessage
+        if (likeData.totalLikeCount !== undefined) {
+          currentTotalLikes = likeData.totalLikeCount
+        }
         break
+      }
       case 'gift':
         user = (data as WebcastGiftMessage).user
         break
@@ -78,12 +97,18 @@ const leaderboardData = computed(() => {
       case 'chat':
         userEntry.messages++
         break
-      case 'like':
-        userEntry.likes += (data as WebcastLikeMessage).likeCount || 1
+      case 'like': {
+        // Fix: Handle undefined likeCount with braces
+        const likeCount = (data as WebcastLikeMessage).likeCount
+        userEntry.likes += (typeof likeCount === 'number' ? likeCount : 1)
         break
-      case 'gift':
-        userEntry.gifts += (data as WebcastGiftMessage).repeatCount || 1
+      }
+      case 'gift': {
+        // Fix: Handle undefined repeatCount with braces
+        const repeatCount = (data as WebcastGiftMessage).repeatCount
+        userEntry.gifts += (typeof repeatCount === 'number' ? repeatCount : 1)
         break
+      }
       case 'follow':
         userEntry.follows++
         break
@@ -94,6 +119,11 @@ const leaderboardData = computed(() => {
       + userEntry.messages * 2
       + userEntry.gifts * 10
       + userEntry.follows * 5
+  })
+
+  // Update totalLikes outside of computed
+  nextTick(() => {
+    totalLikes.value = currentTotalLikes
   })
 
   return Array.from(userMap.values())
@@ -276,7 +306,7 @@ const getCurrentValue = (user: LeaderboardUser) => {
     </div>
     <div class="text-center">
       <p class="text-lg font-bold">
-        {{ leaderboardData.length }}
+        {{ viewerCount }}
       </p>
       <p class="text-xs text-muted">
         Active Users
