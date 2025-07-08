@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import type { WebcastLikeMessage } from 'tiktok-live-connector'
 
 const canvasRef = ref<HTMLCanvasElement>()
@@ -28,12 +29,10 @@ const { events } = storeToRefs(store)
 // Available animations to load
 const animationFiles = [
   'Dying.glb',
-  'Hit On Back Of Head.glb',
   'Hit Reaction.glb',
   'Hit To Body.glb',
   'Kidney Hit.glb',
-  'Standing Death Forward 01.glb',
-  'Standing React Large From Left.glb'
+  'Standing Death Forward 01.glb'
 ]
 
 // HP bar computed properties
@@ -147,8 +146,10 @@ const loadAnimations = async () => {
 
   for (let i = 0; i < animationFiles.length; i++) {
     const fileName = animationFiles[i]
+    if (!fileName) continue // Skip if fileName is undefined
+
     try {
-      const gltf = await new Promise((resolve, reject) => {
+      const gltf = await new Promise<GLTF>((resolve, reject) => {
         loader.load(
           `/animation/${fileName}`,
           resolve,
@@ -157,8 +158,8 @@ const loadAnimations = async () => {
         )
       })
 
-      if (gltf.animations.length > 0) {
-        const animationName = fileName?.replace('.glb', '')
+      if (gltf.animations.length > 0 && gltf.animations[0]) {
+        const animationName = fileName.replace('.glb', '') // Remove optional chaining since we checked above
         const action = mixer.clipAction(gltf.animations[0])
         action.setLoop(THREE.LoopOnce, 1)
         action.clampWhenFinished = true
@@ -224,19 +225,17 @@ const triggerRandomHitAnimation = () => {
   const hitAnimations = [
     'Hit Reaction',
     'Hit To Body',
-    'Hit On Back Of Head',
-    'Kidney Hit',
-    'Standing React Large From Left'
+    'Kidney Hit'
   ]
 
-  const randomHit = hitAnimations[Math.floor(Math.random() * hitAnimations.length)]
+  const randomHit = hitAnimations[Math.floor(Math.random() * hitAnimations.length)] || 'Hit Reaction'
   playAnimation(randomHit)
 }
 
 // Trigger the death animation
 const triggerDeathAnimation = () => {
   const deathAnimations = ['Dying', 'Standing Death Forward 01']
-  const randomDeath = deathAnimations[Math.floor(Math.random() * deathAnimations.length)]
+  const randomDeath = deathAnimations[Math.floor(Math.random() * deathAnimations.length)] || 'Dying'
   playAnimation(randomDeath)
 }
 
