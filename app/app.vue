@@ -60,7 +60,7 @@ useSeoMeta({
 
       <template #right>
         <UButton
-          to="https://github.com/nuxt-ui-pro/starter"
+          to="https://github.com/vachmara/live-tiktok"
           target="_blank"
           icon="i-simple-icons-github"
           aria-label="GitHub"
