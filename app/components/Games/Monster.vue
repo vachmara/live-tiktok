@@ -19,12 +19,11 @@ const currentHP = ref(1000)
 const isLoading = ref(true)
 const loadingProgress = ref(0)
 const animationsLoaded = ref(0)
-const totalAnimations = ref(7)
 const isPlaying = ref(false)
 
 // Connect to live store
 const store = useLiveStore()
-const { events } = storeToRefs(store)
+const { events, debug } = storeToRefs(store)
 
 // Available animations to load
 const animationFiles = [
@@ -34,6 +33,8 @@ const animationFiles = [
   'Kidney Hit.glb',
   'Standing Death Forward 01.glb'
 ]
+
+const totalAnimations = ref(animationFiles.length)
 
 // HP bar computed properties
 const hpPercentage = computed(() => (currentHP.value / maxHP.value) * 100)
@@ -431,9 +432,9 @@ defineExpose({
       </p>
     </div>
 
-    <!-- Debug controls (only in development) -->
+    <!-- Debug controls -->
     <div
-      v-if="$dev"
+      v-if="debug"
       class="absolute bottom-4 right-4 space-y-2"
     >
       <UButton
@@ -456,7 +457,7 @@ defineExpose({
         size="xs"
         color="warning"
         :disabled="!isPlaying"
-        @click="playAnimation('Hit Reaction')"
+        @click="playAnimation('Kidney Hit')"
       >
         Test Animation
       </UButton>
