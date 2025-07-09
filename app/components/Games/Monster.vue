@@ -20,6 +20,7 @@ const isLoading = ref(true)
 const loadingProgress = ref(0)
 const animationsLoaded = ref(0)
 const isPlaying = ref(false)
+const isAnimationLocked = ref(false) // Lock to prevent animation interruptions
 
 // Connect to live store
 const store = useLiveStore()
@@ -74,11 +75,11 @@ const initThreeJS = () => {
   renderer.toneMappingExposure = 1.2
 
   // Enhanced lighting for better visuals
-  const ambientLight = new THREE.AmbientLight(0x404040, 0.4)
+  const ambientLight = new THREE.AmbientLight(0x404040, 5)
   scene.add(ambientLight)
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5)
-  directionalLight.position.set(5, 10, 5)
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 50)
+  directionalLight.position.set(5, 5, 5)
   directionalLight.castShadow = true
   directionalLight.shadow.mapSize.width = 2048
   directionalLight.shadow.mapSize.height = 2048
@@ -243,6 +244,7 @@ const triggerDeathAnimation = () => {
 // Play a specific animation
 const playAnimation = (animationName: string) => {
   if (!isPlaying.value) return // Only play animations when game is active
+  if (isAnimationLocked.value) return // Don't play new animation if locked
 
   if (animationActions[animationName]) {
     // Stop all other animations
@@ -253,6 +255,12 @@ const playAnimation = (animationName: string) => {
     // Play the requested animation
     const action = animationActions[animationName]
     action.reset().play()
+
+    // Lock animation for 2 seconds
+    isAnimationLocked.value = true
+    setTimeout(() => {
+      isAnimationLocked.value = false
+    }, 1500)
 
     console.log(`Playing animation: ${animationName}`)
   }
